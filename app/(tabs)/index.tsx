@@ -6,6 +6,7 @@ import * as Network from 'expo-network';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { type SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
+import { Skeleton } from 'moti/skeleton';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -263,11 +264,7 @@ export default function Home() {
       <Container disableBottomPadding onLayout={onLayoutRootView}>
         <OnboardingScreen isOnboardingComplete={isOnboardingComplete} />
 
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="small" />
-          </View>
-        ) : isError ? (
+        {isError ? (
           <View className="flex-1 items-center justify-center">
             <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>
               Failed to load data. Please try again.
@@ -275,7 +272,7 @@ export default function Home() {
           </View>
         ) : (
           <FlatList
-            extraData={[currentTime, selectedFilter, refreshKey]}
+            extraData={[currentTime, selectedFilter, refreshKey, true]}
             data={filteredLocations}
             refreshControl={
               <RefreshControl
@@ -285,15 +282,13 @@ export default function Home() {
               />
             }
             contentContainerClassName="flex gap-y-3 pb-8"
-            renderItem={({ item }) => {
-              return (
-                <LocationItem
-                  key={`${item.id}-${refreshKey}`}
-                  location={item}
-                  currentTime={currentTime}
-                />
-              );
-            }}
+            renderItem={({ item }) => (
+              <Skeleton.Group show={isLoading}>
+                <Skeleton radius={8} colorMode={isDarkMode ? 'dark' : 'light'}>
+                  <LocationItem location={item} currentTime={currentTime} />
+                </Skeleton>
+              </Skeleton.Group>
+            )}
             keyExtractor={(item) => item.id.toString()}
             numColumns={1}
             showsVerticalScrollIndicator={false}
