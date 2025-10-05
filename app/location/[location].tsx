@@ -5,8 +5,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { Skeleton } from 'moti/skeleton';
 import { usePostHog } from 'posthog-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import Reanimated from 'react-native-reanimated';
+import { Pressable, Text, View } from 'react-native';
 import { Container } from '~/components/Container';
 import type { ListItem } from '~/hooks/useCategoryExpansion';
 import { useCategoryExpansion } from '~/hooks/useCategoryExpansion';
@@ -196,7 +195,7 @@ const Location = () => {
 
   // Memoize the displayed items to prevent unnecessary recalculations
   const displayedItems = useMemo(() => {
-    if (loading) return skeletonItems;
+    if (loading || isSwitchingMenus) return skeletonItems;
     if (error) return []; // Return empty array on error, EmptyState will handle the display
     return debouncedSearchQuery ||
       Object.values(activeFilters).some(
@@ -212,6 +211,7 @@ const Location = () => {
     flattenedItems,
     skeletonItems,
     activeFilters,
+    isSwitchingMenus,
   ]);
 
   // In your renderItem function in [location].tsx
@@ -347,29 +347,6 @@ const Location = () => {
           getItemType={(item) => ('type' in item ? item.type : 'unknown')}
           keyboardShouldPersistTaps="always"
         />
-
-        {/* Loading indicator for menu switching */}
-        {isSwitchingMenus && (
-          <View
-            className="absolute inset-0 z-10 flex h-screen items-center justify-center"
-            style={{
-              backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
-            }}
-          >
-            <View
-              className="flex items-center justify-center rounded-lg p-4"
-              style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
-                elevation: 5,
-              }}
-            >
-              <ActivityIndicator size="small" style={{ marginBottom: 8 }} />
-            </View>
-          </View>
-        )}
 
         <ScrollToTopButton
           visible={showScrollToTop}
